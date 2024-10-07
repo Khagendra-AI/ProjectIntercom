@@ -23,7 +23,7 @@ const Search = ({navigation}: {navigation: any}) => {
       onPress={() => {
         navigation.navigate('Chat', {item: item});
       }}>
-      <View style={[styles.avatar, {backgroundColor: randomColor()}]}>
+      <View style={[styles.avatar, {backgroundColor: `${item.color}`}]}>
         <Text>{item.profileImage}</Text>
       </View>
       <View style={styles.flatsubcontainer}>

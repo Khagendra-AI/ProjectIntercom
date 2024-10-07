@@ -38,8 +38,10 @@ const Menu = ({navigation}) => {
       <SearchBox />
       <View style={styles.newchat}>
         {/* <Text>Start a new chat</Text> */}
-        <TouchableOpacity onPress={togglemodal}>
-          <Image source={Icons.chat1} style={styles.chaticon} />
+        <Image source={Icons.chat1} style={styles.chaticon} />
+        <Text style={styles.nochattext}>No chats yet!</Text>
+        <TouchableOpacity style={styles.touchablestartchattext} onPress={togglemodal}>
+          <Text style={styles.startchattext}>Start Chat</Text>
         </TouchableOpacity>
         <Modals
           visible={modal}
@@ -58,7 +60,8 @@ export default Menu;
 
 const styles = StyleSheet.create({
   header: {
-    flex: 0.28,
+    height : SCREEN_HEIGHT * .15,
+    //flex: 0.20,
     backgroundColor: '#2a7bbb',
     flexDirection: 'row',
   },
@@ -71,7 +74,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: '5%',
   },
-  chaticon :{},
+  chaticon :{
+    alignSelf : 'center',
+    height : 100,
+    width : 100,
+  },
   headertext: {},
   newchat: {
     alignSelf: 'center',
@@ -79,4 +86,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bellimage: {height: '55%', width: '10%'},
+  nochattext:{
+    fontWeight : '800',
+    alignSelf : 'center'
+  },
+  startchattext:{
+    color : 'white',
+  },
+  touchablestartchattext:{padding : 5,
+    marginTop : 5,
+    backgroundColor : '#2c7bbb',
+    alignItems : 'center',
+  
+
+  },
 });

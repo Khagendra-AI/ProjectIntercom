@@ -31,5 +31,6 @@ const Icons = {
 };
 const Images = {
   noresult: require('./images/noresult.png'),
+  splashh: require('./images/splashh.png'),
 };
 export {Icons, Images};

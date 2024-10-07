@@ -5,6 +5,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Search from './src/screens/Search';
 import Chat from './src/screens/Chat';
+import Splash from './src/screens/Splash';
 const Stack = createNativeStackNavigator();
 
 
@@ -15,6 +16,11 @@ const App = () => {
     <>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Splash">
+      <Stack.Screen
+          options={{headerShown: false}}
+          name="Splash"
+          component={Splash}
+        />
         <Stack.Screen
           options={{headerShown: false}}
           name="Bottom"
