@@ -3,7 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
+	
 	<string>en</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to upload images.</string>
 	<key>CFBundleDisplayName</key>
 	<string>ProjectInterCom</string>
 	<key>CFBundleExecutable</key>
