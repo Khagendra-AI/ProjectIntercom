@@ -10,43 +10,83 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {useRoute} from '@react-navigation/native';
 import {Icons} from '../assets';
-import {GiftedChat} from 'react-native-gifted-chat';
+import {GiftedChat, IMessage} from 'react-native-gifted-chat';
 import ImagePicker from 'react-native-image-crop-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
-const randomColor = require('randomcolor'); // import the script
+const randomColor = require('randomcolor');
 const color = randomColor();
 const Chat = ({navigation}: {navigation: any}) => {
-  // const route = {
-  //     params: {
+  const [messages, setMessages] = React.useState<IMessage>();
+  const [MModal, setMModal] = React.useState(false);
+  const [OModal, setOModal] = React.useState(false);
+  const [inputText, setInputText] = React.useState('');
+  const [deleteModal, setdeleteModal] = React.useState(false);
+  const route = useRoute();
+  const item = route?.params;
+  const chatId = route.params?.item.id;
+  const [toggle, setToggle] = useState(false);
 
-  //     }
-  // }
+  React.useEffect(() => {
+    const LoadMessages = async () => {
+      const storedMessages = await AsyncStorage.getItem(`messages_${chatId}`);
+      if (storedMessages) {
+        const parsedMesssage = JSON.parse(storedMessages);
+        // console.log(parsedMesssage, ']]]]]]]');
+
+        setMessages(parsedMesssage);
+        // console.log(messages, '..............');
+      } else {
+        const initialMessage = [
+          {
+            _id: 1,
+            text: 'Hello Dev',
+            createdAt: new Date(),
+            user: {
+              _id: 2,
+              name: 'React Native',
+            },
+          },
+        ];
+        setMessages(initialMessage);
+        // console.log(messages, '[[[[[[[[[[');
+      }
+    };
+    LoadMessages();
+  }, [chatId, toggle]);
+
   const onSend = React.useCallback((newMessages = []) => {
-    setMessages(previousMessages =>
-      GiftedChat.append(previousMessages, newMessages),
-    );
+    setMessages(previousMessages => {
+      const updatedMessage = GiftedChat.append(previousMessages, newMessages);
+      AsyncStorage.setItem(
+        `messages_${chatId}`,
+        JSON.stringify(updatedMessage),
+      );
+      return updatedMessage;
+    });
   }, []);
-  const handleSend = () => {
-    if (inputText.trim().length > 0) {
-      const newMsg: Item = {
-        _id: messageIdCounter.current,
-        text: inputText.trim(),
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: 'User',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      };
-      setMsgs(previousMsgs => GiftedChat.append(previousMsgs, [newMsg]));
-      setInputText('');
-      messageIdCounter.current += 1;
-    }
-  };
+
+  // const handleSend = () => {
+  //   if (inputText.trim().length > 0) {
+  //     const newMsg: Item = {
+  //       _id: messageIdCounter.current,
+  //       text: inputText.trim(),
+  //       createdAt: new Date(),
+  //       user: {
+  //         _id: 1,
+  //         name: 'User',
+
+  //       },
+  //     };
+  //     setMsgs(previousMsgs => GiftedChat.append(previousMsgs, [newMsg]));
+  //     setInputText('');
+  //     messageIdCounter.current += 1;
+  //   }
+  // };
   const toggleMModal = () => {
     setMModal(!MModal);
   };
@@ -55,7 +95,6 @@ const Chat = ({navigation}: {navigation: any}) => {
       <View style={styles.footer}>
         <TouchableOpacity
           onPress={() => {
-            // Image picker functionality to select an image
             ImagePicker.openPicker({
               width: 300,
               height: 400,
@@ -70,17 +109,15 @@ const Chat = ({navigation}: {navigation: any}) => {
                   user: {
                     _id: 1,
                     name: 'User',
-                    avatar: 'https://placeimg.com/140/140/any',
                   },
-                  image: image.path, // Add image path here
+                  image: image.path,
                 };
-                onSend([newMsg]); // Send image message
+                onSend([newMsg]);
               })
               .catch(error => {
                 Alert.alert(JSON.stringify(error));
               });
-          }}
-          >
+          }}>
           <Image source={Icons.add} style={styles.backIcon} />
         </TouchableOpacity>
         <TextInput
@@ -93,7 +130,6 @@ const Chat = ({navigation}: {navigation: any}) => {
                 user: {
                   _id: 1,
                   name: 'User',
-                  avatar: 'https://placeimg.com/140/140/any',
                 },
               };
               onSend([newMsg]);
@@ -115,7 +151,6 @@ const Chat = ({navigation}: {navigation: any}) => {
                 user: {
                   _id: 1,
                   name: 'User',
-                  avatar: 'https://placeimg.com/140/140/any',
                 },
               };
               onSend([newMsg]);
@@ -130,37 +165,6 @@ const Chat = ({navigation}: {navigation: any}) => {
   const toggleOptionModal = () => {
     setOModal(!OModal);
   };
-  const route = useRoute();
-  const {item} = route?.params;
-
-  //console.log('item,,', item);
-
-  const [messages, setMessages] = React.useState([]);
-  const [MModal, setMModal] = React.useState(false);
-  const [OModal, setOModal] = React.useState(false);
-  const [inputText, setInputText] = React.useState('');
-  const [deleteModal,setdeleteModal]=React.useState(false)
-
-  React.useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: '',
-        },
-      },
-    ]);
-  }, []);
-
-  // const onSend = React.useCallback((newMessages = []) => {
-  //   setMessages(previousMessages =>
-  //     GiftedChat.append(previousMessages, newMessages),
-  //   );
-  // }, []);
 
   return (
     // <View>{/* <Text>{JSON.stringify(item)}</Text> */}</View>
@@ -175,11 +179,15 @@ const Chat = ({navigation}: {navigation: any}) => {
             <Image source={Icons.back} style={styles.back} />
           </TouchableOpacity>
           <View style={styles.headerdata}>
-            <View style={[styles.avatar, {backgroundColor: `${item.color}`}]}>
-              <Text>{item.profileImage}</Text>
+            <View
+              style={[
+                styles.avatar,
+                {backgroundColor: `${route.params.item.color}`},
+              ]}>
+              <Text>{route.params.item.profileImage}</Text>
             </View>
             <View style={styles.headertext}>
-              <Text style={styles.nametext}>{item.name}</Text>
+              <Text style={styles.nametext}>{route.params.item.name}</Text>
               <Text style={styles.infotext}>Clocked in</Text>
             </View>
           </View>
@@ -192,7 +200,7 @@ const Chat = ({navigation}: {navigation: any}) => {
       </View>
 
       <GiftedChat
-       loadEarlier={true}
+        loadEarlier={true}
         messagesContainerStyle={{backgroundColor: '#e7edf3'}}
         onLongPress={toggleMModal}
         messages={messages}
@@ -249,9 +257,13 @@ const Chat = ({navigation}: {navigation: any}) => {
               <Text style={styles.MModalText}>Report</Text>
             </TouchableOpacity>
             <View style={styles.horline} />
-            <TouchableOpacity style={styles.modalSubContent} onPress={()=>{setdeleteModal(true), setMModal(false)}} >
+            <TouchableOpacity
+              style={styles.modalSubContent}
+              onPress={() => {
+                setdeleteModal(true), setMModal(false);
+              }}>
               <Image source={Icons.delete} style={styles.MModalIcon} />
-              <Text style={[styles.MModalText, {color : 'red'}]}>Delete</Text>
+              <Text style={[styles.MModalText, {color: 'red'}]}>Delete</Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -274,9 +286,9 @@ const Chat = ({navigation}: {navigation: any}) => {
               <Text style={styles.MModalText}>Search Chat</Text>
             </TouchableOpacity>
             <View style={styles.horline} />
-            <TouchableOpacity style={styles.modalSubContent} >
+            <TouchableOpacity style={styles.modalSubContent}>
               <Image style={styles.MModalIcon} source={Icons.delete} />
-              <Text style={[styles.MModalText, {color : 'red'}]}>Delete</Text>
+              <Text style={[styles.MModalText, {color: 'red'}]}>Delete</Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -289,7 +301,7 @@ const Chat = ({navigation}: {navigation: any}) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer1}>
             <View style={styles.deleteiconview}>
-            <Image source={Icons.delete} style={styles.emoji}/>
+              <Image source={Icons.delete} style={styles.emoji} />
             </View>
             <Text style={styles.accountText}>Delete Message?</Text>
             <Text style={styles.modalText}>
@@ -303,7 +315,9 @@ const Chat = ({navigation}: {navigation: any}) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.primaryCont}
-                onPress={()=>{setdeleteModal(false)}}>
+                onPress={() => {
+                  setdeleteModal(false);
+                }}>
                 <Text style={styles.primary}>Yes, Delete</Text>
               </TouchableOpacity>
             </View>
@@ -334,7 +348,7 @@ const styles = StyleSheet.create({
     marginTop: SCREEN_HEIGHT * 0.095,
   },
   headerdata: {
-    width : '60%',
+    width: '60%',
     flexDirection: 'row',
     // backgroundColor :'red',
     alignItems: 'center',
@@ -429,7 +443,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 5,
   },
-  footer: {marginBottom : 25,
+  footer: {
+    marginBottom: SCREEN_HEIGHT *.03,
     flexDirection: 'row',
     marginLeft: 10,
     marginTop: 10,
@@ -455,10 +470,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     fontWeight: '700',
-    color: 'blue'
+    color: 'blue',
   },
   modalText: {
-   // color: colors.modalText,
+    // color: colors.modalText,
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '400',
